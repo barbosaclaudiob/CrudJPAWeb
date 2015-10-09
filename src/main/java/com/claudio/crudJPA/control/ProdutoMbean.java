@@ -25,7 +25,7 @@ public class ProdutoMbean extends ManagedBeanGenerico{
     
     public void salvar(Produto p) {
         ps.salvar(p);
-        ServicoUtilsMbean.update("rsrsrs");
+        ServicoUtilsMbean.update("icomponente");
     }
     
     public void excluir(Produto p) {

@@ -20,27 +20,13 @@ import javax.persistence.TypedQuery;
 public class GenericService<T extends BaseEntity> {
 
     private static EntityManagerFactory emf;
-    private static EntityManager em;
 
     static {
         emf = Persistence.createEntityManagerFactory("postgres");
     }
 
     public EntityManager getEM() {
-        if (em == null) {
-            em = emf.createEntityManager();
-        }
-        return em;
-    }
-
-    public void begin() {
-        if (!getEM().getTransaction().isActive()) {
-            getEM().getTransaction().begin();
-        }
-    }
-
-    public void commit() {
-        getEM().getTransaction().commit();
+        return emf.createEntityManager();
     }
 
     public void close() {
@@ -54,26 +40,27 @@ public class GenericService<T extends BaseEntity> {
     }
 
     public T salvar(T c) {
-
-        begin();
+        EntityManager em = getEM();
+        em.getTransaction().begin();
         try {
             if (c.getId() != null) {
-                return getEM().merge(c);
+                return em.merge(c);
             } else {
-                getEM().persist(c);
+                em.persist(c);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            commit();
+            em.getTransaction().commit();
         }
         return c;
     }
 
     public void excluir(T c) {
-       begin();
-       getEM().remove(c);
-       commit();
+        EntityManager em = getEM();
+        em.getTransaction().begin();
+        getEM().remove(c);
+        em.getTransaction().commit();
     }
 
     public T buscarPorId(Long id) {
@@ -87,8 +74,6 @@ public class GenericService<T extends BaseEntity> {
         TypedQuery<T> qry = getEM()
                 .createQuery(jpql, clazz);
 
-//		qry.setFirstResult(10);
-//		qry.setMaxResults(10);
         return qry.getResultList();
     }
 }
